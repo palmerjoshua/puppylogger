@@ -9,7 +9,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .editing {
-      background-color: #fef9c3;
+      background-color: #D0E8FF;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      margin-top: 0.4rem;
+
     }
     .modal {
       background-color: rgba(0, 0, 0, 0.5);
@@ -21,6 +25,20 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    @keyframes fadeSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-open {
+    animation: fadeSlideDown 0.3s cubic-bezier(.6,-0.28,.735,.045);
+  }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
@@ -121,7 +139,8 @@ function renderLogs() {
         li.className = 'border-b last:border-0 pb-2 flex flex-col';
 
         if (editing.date === date && editing.id === item.id) {
-          li.classList.add('editing');
+          li.classList.add('editing', 'animate-open');
+
 
           // Start time picker
           const timeInput = document.createElement('input');
