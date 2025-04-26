@@ -100,7 +100,8 @@
   </div>
 
   <script>
-    let editing = { date: null, id: null, showEndTime: false };
+    let editing     = { date: null, id: null, showEndTime: false };
+    let lastEditing = { date: null, id: null };
     let showNoteInput = false;
     const activities = [
       { emoji: "🍴", label: "Feed" },
@@ -122,6 +123,7 @@
     }
 
     function renderLogs() {
+      const isNewEdit = editing.date !== lastEditing.date || editing.id !== lastEditing.id;
       const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
       const logList = document.getElementById('logList');
       logList.innerHTML = '';
@@ -144,7 +146,8 @@
             entry.className = 'border-b last:border-0 pb-2 flex flex-col';
 
             if (editing.date === date && editing.id === item.id) {
-              entry.classList.add('editing', 'bg-blue-100', 'animate-open');
+              entry.classList.add('editing', 'bg-blue-100');
+              if (isNewEdit) entry.classList.add('animate-open');
 
               const timeInput = document.createElement('input');
               timeInput.type = 'time';
@@ -236,6 +239,7 @@
 
         dateItem.appendChild(section);
         logList.appendChild(dateItem);
+        lastEditing = { date: editing.date, id: editing.id };
       });
     }
 
