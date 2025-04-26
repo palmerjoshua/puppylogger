@@ -76,7 +76,7 @@
   </div>
 
 <script>
-let editing = { date: null, id: null };
+let editing = { date: null, id: null, showEndTime: false };
 let showNoteInput = false;
 
 const activities = [
@@ -91,14 +91,9 @@ function logActivity(activity) {
   const now = new Date();
   const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const today = now.toISOString().split('T')[0];
-
   const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
-
-  if (!logs[today]) {
-    logs[today] = [];
-  }
+  if (!logs[today]) logs[today] = [];
   logs[today].unshift({ id: Date.now(), time: timeString, activity });
-
   localStorage.setItem('puppyLogs', JSON.stringify(logs));
   renderLogs();
 }
@@ -107,45 +102,68 @@ function renderLogs() {
   const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
   const logList = document.getElementById('logList');
   logList.innerHTML = '';
-
   const dates = Object.keys(logs).sort((a, b) => b.localeCompare(a));
 
   dates.forEach(date => {
     const section = document.createElement('div');
     section.className = 'bg-white shadow rounded-lg p-4 mb-6';
-
     const title = document.createElement('h3');
     title.className = 'text-md font-bold mb-2';
     title.textContent = formatDate(date);
     section.appendChild(title);
 
     logs[date]
-  .slice() // defensive copy
-  .sort((a, b) => convertToMinutes(b.time) - convertToMinutes(a.time))
-  .forEach((item) => {
+      .slice()
+      .sort((a, b) => convertToMinutes(b.time) - convertToMinutes(a.time))
+      .forEach(item => {
         const li = document.createElement('div');
         li.className = 'border-b last:border-0 pb-2 flex flex-col';
 
         if (editing.date === date && editing.id === item.id) {
           li.classList.add('editing');
 
+          // Start time picker
           const timeInput = document.createElement('input');
           timeInput.type = 'time';
           timeInput.value = convertTo24hFormat(item.time);
           timeInput.className = 'border rounded p-1 mb-2';
+          li.appendChild(timeInput);
 
+          // Optional end-time picker
+          let endTimeInput = null;
+          if (editing.showEndTime) {
+            endTimeInput = document.createElement('input');
+            endTimeInput.type = 'time';
+            endTimeInput.value = item.endTime
+              ? convertTo24hFormat(item.endTime)
+              : timeInput.value;
+            endTimeInput.className = 'border rounded p-1 mb-2';
+            li.appendChild(endTimeInput);
+          }
+
+          // Add / Remove End Time toggle
+          const endTimeToggle = document.createElement('button');
+          endTimeToggle.textContent = editing.showEndTime ? 'Remove End Time' : 'Add End Time';
+          endTimeToggle.className = 'text-blue-500 text-sm underline mb-2 text-left';
+          endTimeToggle.onclick = () => {
+            editing.showEndTime = !editing.showEndTime;
+            renderLogs();
+          };
+          li.appendChild(endTimeToggle);
+
+          // Activity select
           const activitySelect = document.createElement('select');
           activitySelect.className = 'border rounded p-1 mb-2';
           activities.forEach(act => {
             const option = document.createElement('option');
             option.value = `${act.emoji} ${act.label}`;
             option.textContent = `${act.emoji} ${act.label}`;
-            if (item.activity === `${act.emoji} ${act.label}`) {
-              option.selected = true;
-            }
+            if (item.activity === option.value) option.selected = true;
             activitySelect.appendChild(option);
           });
+          li.appendChild(activitySelect);
 
+          // Note add/edit
           const noteLink = document.createElement('button');
           noteLink.textContent = item.note ? "Edit Note" : "Add Note";
           noteLink.className = 'text-blue-500 text-sm underline mb-2 text-left';
@@ -153,22 +171,34 @@ function renderLogs() {
             showNoteInput = true;
             renderLogs();
           };
+          li.appendChild(noteLink);
 
           const noteInput = document.createElement('textarea');
-          noteInput.className = 'border rounded p-1 mb-2 w-full';
+          noteInput.className = showNoteInput
+            ? 'border rounded p-1 mb-2 w-full'
+            : 'border rounded p-1 mb-2 w-full hidden';
           noteInput.placeholder = 'Enter note...';
           noteInput.value = item.note || '';
-          if (!showNoteInput) {
-            noteInput.classList.add('hidden');
-          }
+          li.appendChild(noteInput);
 
+          // Save / Cancel / Delete buttons
           const buttonRow = document.createElement('div');
           buttonRow.className = 'flex space-x-2';
 
           const saveBtn = document.createElement('button');
           saveBtn.textContent = 'Save';
           saveBtn.className = 'text-green-600 underline';
-          saveBtn.onclick = () => saveEdit(date, item.id, timeInput.value, activitySelect.value, noteInput.value);
+          saveBtn.onclick = () => {
+            const end24 = endTimeInput ? endTimeInput.value.trim() : '';
+            saveEdit(
+              date,
+              item.id,
+              timeInput.value,
+              activitySelect.value,
+              noteInput.value,
+              end24
+            );
+          };
 
           const cancelBtn = document.createElement('button');
           cancelBtn.textContent = 'Cancel';
@@ -183,11 +213,6 @@ function renderLogs() {
           buttonRow.appendChild(saveBtn);
           buttonRow.appendChild(cancelBtn);
           buttonRow.appendChild(deleteBtn);
-
-          li.appendChild(timeInput);
-          li.appendChild(activitySelect);
-          li.appendChild(noteLink);
-          li.appendChild(noteInput);
           li.appendChild(buttonRow);
 
         } else {
@@ -197,17 +222,23 @@ function renderLogs() {
           const leftContent = document.createElement('div');
           leftContent.className = 'flex flex-col';
 
+          const timeDisplay = item.endTime
+            ? `${item.time} - ${item.endTime}`
+            : item.time;
+
           let noteText = '';
           if (item.note) {
-            const displayNote = item.note.length > 50 ? item.note.slice(0, 50) + "..." : item.note;
-            noteText = `"${displayNote}"`;
+            const displayNote = item.note.length > 50
+              ? item.note.slice(0, 50) + "..."
+              : item.note;
+            noteText = `<span class="ml-1 italic text-gray-500 truncate-note" title="${item.note}">"${displayNote}"</span>`;
           }
 
           leftContent.innerHTML = `
-            <span class="font-semibold">${item.time}</span>
+            <span class="font-semibold">${timeDisplay}</span>
             <div class="flex flex-wrap items-center">
               <span>${item.activity}</span>
-              ${noteText ? `<span class="ml-1 italic text-gray-500 truncate-note" title="${item.note}">${noteText}</span>` : ''}
+              ${noteText}
             </div>
           `;
 
@@ -215,7 +246,11 @@ function renderLogs() {
           editBtn.className = 'text-blue-500 hover:text-blue-700';
           editBtn.innerText = '✏️';
           editBtn.onclick = () => {
-            editing = { date, id: item.id };
+            editing = {
+              date,
+              id: item.id,
+              showEndTime: !!item.endTime
+            };
             showNoteInput = false;
             renderLogs();
           };
@@ -232,32 +267,39 @@ function renderLogs() {
   });
 }
 
-function saveEdit(date, id, newTime, newActivity, newNote) {
+function saveEdit(date, id, newTime24, newActivity, newNote, newEnd24) {
   const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
-  const items = logs[date];
-
+  const items = logs[date] || [];
   const item = items.find(entry => entry.id === id);
   if (item) {
-    item.time = convertTo12hFormat(newTime);
+    item.time = convertTo12hFormat(newTime24);
     item.activity = newActivity;
     item.note = newNote.trim() || undefined;
+    if (newEnd24) {
+      item.endTime = convertTo12hFormat(newEnd24);
+    } else {
+      delete item.endTime;
+    }
   }
-
-  // Sort and overwrite
   logs[date] = items.sort((a, b) => convertToMinutes(a.time) - convertToMinutes(b.time));
-
   localStorage.setItem('puppyLogs', JSON.stringify(logs));
-  
-  editing = { date: null, id: null };
+  editing = { date: null, id: null, showEndTime: false };
   showNoteInput = false;
   renderLogs();
 }
 
-
 function cancelEdit() {
-  editing = { date: null, id: null };
+  editing = { date: null, id: null, showEndTime: false };
   showNoteInput = false;
   renderLogs();
+}
+
+function deleteEntry(date, id) {
+  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
+  logs[date] = (logs[date] || []).filter(e => e.id !== id);
+  if (logs[date].length === 0) delete logs[date];
+  localStorage.setItem('puppyLogs', JSON.stringify(logs));
+  cancelEdit();
 }
 
 function openClearConfirm() {
@@ -272,7 +314,7 @@ function closeClearConfirm() {
 
 function confirmClearLog() {
   localStorage.removeItem('puppyLogs');
-  editing = { date: null, id: null };
+  editing = { date: null, id: null, showEndTime: false };
   showNoteInput = false;
   closeClearConfirm();
   renderLogs();
@@ -280,23 +322,35 @@ function confirmClearLog() {
 
 function convertTo24hFormat(time12h) {
   const [time, modifier] = time12h.split(' ');
-  let [hours, minutes] = time.split(':');
-  if (hours === '12') hours = '00';
-  if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  let [hourStr, minuteStr] = time.split(':');
+  let hours = parseInt(hourStr, 10);
+  const minutes = parseInt(minuteStr, 10);
+
+  // handle midnight/noon
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+
+  const hh = String(hours).padStart(2, '0');
+  const mm = String(minutes).padStart(2, '0');
+  return `${hh}:${mm}`;
 }
+
 
 function convertTo12hFormat(time24h) {
   let [hours, minutes] = time24h.split(':');
-  let modifier = 'AM';
   hours = parseInt(hours, 10);
-  if (hours >= 12) {
-    modifier = 'PM';
-    if (hours > 12) hours -= 12;
-  } else if (hours === 0) {
-    hours = 12;
-  }
+  const modifier = hours >= 12 ? 'PM' : 'AM';
+  if (hours === 0) hours = 12;
+  else if (hours > 12) hours -= 12;
   return `${hours}:${minutes} ${modifier}`;
+}
+
+function convertToMinutes(timeString) {
+  const [time, modifier] = timeString.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + minutes;
 }
 
 function formatDate(isoDate) {
@@ -305,7 +359,7 @@ function formatDate(isoDate) {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  return `${months[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+  return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
 }
 
 function openModal() {
@@ -316,14 +370,6 @@ function openModal() {
 function closeModal() {
   document.getElementById('modal').classList.remove('flex');
   document.getElementById('modal').classList.add('hidden');
-}
-
-function convertToMinutes(timeString) {
-  const [time, modifier] = timeString.split(' ');
-  let [hours, minutes] = time.split(':').map(Number);
-  if (modifier === 'PM' && hours !== 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  return hours * 60 + minutes;
 }
 
 renderLogs();
