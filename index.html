@@ -70,10 +70,8 @@
       </div>
     </div>
   </div>
-  
 
 <script>
-let longPressTimer = null;
 let editing = { date: null, index: null };
 let showNoteInput = false;
 
@@ -187,26 +185,37 @@ function renderLogs() {
 
       } else {
         const mainContent = document.createElement('div');
-        mainContent.className = 'flex flex-col';
+        mainContent.className = 'flex justify-between items-center';
+
+        const leftContent = document.createElement('div');
+        leftContent.className = 'flex flex-col';
 
         let noteText = '';
         if (item.note) {
           const displayNote = item.note.length > 50 ? item.note.slice(0, 50) + "..." : item.note;
-          noteText = `<span class="italic truncate-note text-gray-500" title="${item.note}">"${displayNote}"</span>`;
+          noteText = `"${displayNote}"`;
         }
 
-        mainContent.innerHTML = `
+        leftContent.innerHTML = `
           <span class="font-semibold">${item.time}</span>
-          <span>${item.activity}${noteText ? ' - ' + noteText : ''}</span>
+          <div class="flex flex-wrap items-center">
+            <span>${item.activity}</span>
+            ${noteText ? `<span class="ml-1 italic text-gray-500 truncate-note" title="${item.note}">${noteText}</span>` : ''}
+          </div>
         `;
 
-        li.appendChild(mainContent);
+        const editBtn = document.createElement('button');
+        editBtn.className = 'text-blue-500 hover:text-blue-700';
+        editBtn.innerText = '✏️';
+        editBtn.onclick = () => {
+          editing = { date, index: idx };
+          showNoteInput = false;
+          renderLogs();
+        };
 
-        li.addEventListener('mousedown', (e) => startLongPress(e, date, idx));
-        li.addEventListener('touchstart', (e) => startLongPress(e, date, idx));
-        li.addEventListener('mouseup', cancelLongPress);
-        li.addEventListener('mouseleave', cancelLongPress);
-        li.addEventListener('touchend', cancelLongPress);
+        mainContent.appendChild(leftContent);
+        mainContent.appendChild(editBtn);
+        li.appendChild(mainContent);
       }
 
       section.appendChild(li);
@@ -214,19 +223,6 @@ function renderLogs() {
 
     logList.appendChild(section);
   });
-}
-
-function startLongPress(e, date, index) {
-  cancelLongPress();
-  longPressTimer = setTimeout(() => {
-    editing = { date, index };
-    showNoteInput = false;
-    renderLogs();
-  }, 500);
-}
-
-function cancelLongPress() {
-  clearTimeout(longPressTimer);
 }
 
 function saveEdit(date, index, newTime, newActivity, newNote) {
@@ -256,10 +252,21 @@ function cancelEdit() {
   renderLogs();
 }
 
-function clearLog() {
+function openClearConfirm() {
+  document.getElementById('clearConfirmModal').classList.remove('hidden');
+  document.getElementById('clearConfirmModal').classList.add('flex');
+}
+
+function closeClearConfirm() {
+  document.getElementById('clearConfirmModal').classList.remove('flex');
+  document.getElementById('clearConfirmModal').classList.add('hidden');
+}
+
+function confirmClearLog() {
   localStorage.removeItem('puppyLogs');
   editing = { date: null, index: null };
   showNoteInput = false;
+  closeClearConfirm();
   renderLogs();
 }
 
@@ -301,24 +308,6 @@ function openModal() {
 function closeModal() {
   document.getElementById('modal').classList.remove('flex');
   document.getElementById('modal').classList.add('hidden');
-}
-
-function openClearConfirm() {
-  document.getElementById('clearConfirmModal').classList.remove('hidden');
-  document.getElementById('clearConfirmModal').classList.add('flex');
-}
-
-function closeClearConfirm() {
-  document.getElementById('clearConfirmModal').classList.remove('flex');
-  document.getElementById('clearConfirmModal').classList.add('hidden');
-}
-
-function confirmClearLog() {
-  localStorage.removeItem('puppyLogs');
-  editing = { date: null, index: null };
-  showNoteInput = false;
-  closeClearConfirm();
-  renderLogs();
 }
 
 renderLogs();
