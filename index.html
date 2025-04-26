@@ -35,7 +35,6 @@
 
   <div class="w-full max-w-md space-y-6">
     <div id="logList"></div>
-
     <button onclick="openClearConfirm()" class="text-sm text-red-500 hover:underline">Clear All Entries</button>
   </div>
 
@@ -59,6 +58,10 @@
     </div>
   </div>
 
+  <div class="mt-2 text-xs text-gray-500">
+    © 2025 Joshua Palmer. All rights reserved.
+  </div>  
+
   <!-- Clear Confirmation Modal -->
   <div id="clearConfirmModal" class="fixed inset-0 hidden items-center justify-center modal z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
@@ -72,7 +75,7 @@
   </div>
 
 <script>
-let editing = { date: null, index: null };
+let editing = { date: null, id: null };
 let showNoteInput = false;
 
 const activities = [
@@ -93,7 +96,7 @@ function logActivity(activity) {
   if (!logs[today]) {
     logs[today] = [];
   }
-  logs[today].unshift({ time: timeString, activity });
+  logs[today].unshift({ id: Date.now(), time: timeString, activity });
 
   localStorage.setItem('puppyLogs', JSON.stringify(logs));
   renderLogs();
@@ -115,139 +118,143 @@ function renderLogs() {
     title.textContent = formatDate(date);
     section.appendChild(title);
 
-    logs[date].forEach((item, idx) => {
-      const li = document.createElement('div');
-      li.className = 'border-b last:border-0 pb-2 flex flex-col';
+    logs[date]
+  .slice() // defensive copy
+  .sort((a, b) => convertToMinutes(b.time) - convertToMinutes(a.time))
+  .forEach((item) => {
+        const li = document.createElement('div');
+        li.className = 'border-b last:border-0 pb-2 flex flex-col';
 
-      if (editing.date === date && editing.index === idx) {
-        li.classList.add('editing');
+        if (editing.date === date && editing.id === item.id) {
+          li.classList.add('editing');
 
-        const timeInput = document.createElement('input');
-        timeInput.type = 'time';
-        timeInput.value = convertTo24hFormat(item.time);
-        timeInput.className = 'border rounded p-1 mb-2';
+          const timeInput = document.createElement('input');
+          timeInput.type = 'time';
+          timeInput.value = convertTo24hFormat(item.time);
+          timeInput.className = 'border rounded p-1 mb-2';
 
-        const activitySelect = document.createElement('select');
-        activitySelect.className = 'border rounded p-1 mb-2';
-        activities.forEach(act => {
-          const option = document.createElement('option');
-          option.value = `${act.emoji} ${act.label}`;
-          option.textContent = `${act.emoji} ${act.label}`;
-          if (item.activity === `${act.emoji} ${act.label}`) {
-            option.selected = true;
+          const activitySelect = document.createElement('select');
+          activitySelect.className = 'border rounded p-1 mb-2';
+          activities.forEach(act => {
+            const option = document.createElement('option');
+            option.value = `${act.emoji} ${act.label}`;
+            option.textContent = `${act.emoji} ${act.label}`;
+            if (item.activity === `${act.emoji} ${act.label}`) {
+              option.selected = true;
+            }
+            activitySelect.appendChild(option);
+          });
+
+          const noteLink = document.createElement('button');
+          noteLink.textContent = item.note ? "Edit Note" : "Add Note";
+          noteLink.className = 'text-blue-500 text-sm underline mb-2 text-left';
+          noteLink.onclick = () => {
+            showNoteInput = true;
+            renderLogs();
+          };
+
+          const noteInput = document.createElement('textarea');
+          noteInput.className = 'border rounded p-1 mb-2 w-full';
+          noteInput.placeholder = 'Enter note...';
+          noteInput.value = item.note || '';
+          if (!showNoteInput) {
+            noteInput.classList.add('hidden');
           }
-          activitySelect.appendChild(option);
-        });
 
-        const noteLink = document.createElement('button');
-        noteLink.textContent = item.note ? "Edit Note" : "Add Note";
-        noteLink.className = 'text-blue-500 text-sm underline mb-2 text-left';
-        noteLink.onclick = () => {
-          showNoteInput = true;
-          renderLogs();
-        };
+          const buttonRow = document.createElement('div');
+          buttonRow.className = 'flex space-x-2';
 
-        const noteInput = document.createElement('textarea');
-        noteInput.className = 'border rounded p-1 mb-2 w-full';
-        noteInput.placeholder = 'Enter note...';
-        noteInput.value = item.note || '';
-        if (!showNoteInput) {
-          noteInput.classList.add('hidden');
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = 'Save';
+          saveBtn.className = 'text-green-600 underline';
+          saveBtn.onclick = () => saveEdit(date, item.id, timeInput.value, activitySelect.value, noteInput.value);
+
+          const cancelBtn = document.createElement('button');
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.className = 'text-gray-500 underline';
+          cancelBtn.onclick = cancelEdit;
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.className = 'text-red-500 underline';
+          deleteBtn.onclick = () => deleteEntry(date, item.id);
+
+          buttonRow.appendChild(saveBtn);
+          buttonRow.appendChild(cancelBtn);
+          buttonRow.appendChild(deleteBtn);
+
+          li.appendChild(timeInput);
+          li.appendChild(activitySelect);
+          li.appendChild(noteLink);
+          li.appendChild(noteInput);
+          li.appendChild(buttonRow);
+
+        } else {
+          const mainContent = document.createElement('div');
+          mainContent.className = 'flex justify-between items-center';
+
+          const leftContent = document.createElement('div');
+          leftContent.className = 'flex flex-col';
+
+          let noteText = '';
+          if (item.note) {
+            const displayNote = item.note.length > 50 ? item.note.slice(0, 50) + "..." : item.note;
+            noteText = `"${displayNote}"`;
+          }
+
+          leftContent.innerHTML = `
+            <span class="font-semibold">${item.time}</span>
+            <div class="flex flex-wrap items-center">
+              <span>${item.activity}</span>
+              ${noteText ? `<span class="ml-1 italic text-gray-500 truncate-note" title="${item.note}">${noteText}</span>` : ''}
+            </div>
+          `;
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'text-blue-500 hover:text-blue-700';
+          editBtn.innerText = '✏️';
+          editBtn.onclick = () => {
+            editing = { date, id: item.id };
+            showNoteInput = false;
+            renderLogs();
+          };
+
+          mainContent.appendChild(leftContent);
+          mainContent.appendChild(editBtn);
+          li.appendChild(mainContent);
         }
 
-        const buttonRow = document.createElement('div');
-        buttonRow.className = 'flex space-x-2';
-
-        const saveBtn = document.createElement('button');
-        saveBtn.textContent = 'Save';
-        saveBtn.className = 'text-green-600 underline';
-        saveBtn.onclick = () => saveEdit(date, idx, timeInput.value, activitySelect.value, noteInput.value);
-
-        const cancelBtn = document.createElement('button');
-        cancelBtn.textContent = 'Cancel';
-        cancelBtn.className = 'text-gray-500 underline';
-        cancelBtn.onclick = cancelEdit;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.className = 'text-red-500 underline';
-        deleteBtn.onclick = () => deleteEntry(date, idx);
-
-        buttonRow.appendChild(saveBtn);
-        buttonRow.appendChild(cancelBtn);
-        buttonRow.appendChild(deleteBtn);
-
-        li.appendChild(timeInput);
-        li.appendChild(activitySelect);
-        li.appendChild(noteLink);
-        li.appendChild(noteInput);
-        li.appendChild(buttonRow);
-
-      } else {
-        const mainContent = document.createElement('div');
-        mainContent.className = 'flex justify-between items-center';
-
-        const leftContent = document.createElement('div');
-        leftContent.className = 'flex flex-col';
-
-        let noteText = '';
-        if (item.note) {
-          const displayNote = item.note.length > 50 ? item.note.slice(0, 50) + "..." : item.note;
-          noteText = `"${displayNote}"`;
-        }
-
-        leftContent.innerHTML = `
-          <span class="font-semibold">${item.time}</span>
-          <div class="flex flex-wrap items-center">
-            <span>${item.activity}</span>
-            ${noteText ? `<span class="ml-1 italic text-gray-500 truncate-note" title="${item.note}">${noteText}</span>` : ''}
-          </div>
-        `;
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'text-blue-500 hover:text-blue-700';
-        editBtn.innerText = '✏️';
-        editBtn.onclick = () => {
-          editing = { date, index: idx };
-          showNoteInput = false;
-          renderLogs();
-        };
-
-        mainContent.appendChild(leftContent);
-        mainContent.appendChild(editBtn);
-        li.appendChild(mainContent);
-      }
-
-      section.appendChild(li);
-    });
+        section.appendChild(li);
+      });
 
     logList.appendChild(section);
   });
 }
 
-function saveEdit(date, index, newTime, newActivity, newNote) {
+function saveEdit(date, id, newTime, newActivity, newNote) {
   const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
-  logs[date][index].time = convertTo12hFormat(newTime);
-  logs[date][index].activity = newActivity;
-  logs[date][index].note = newNote.trim() || undefined;
+  const items = logs[date];
+
+  const item = items.find(entry => entry.id === id);
+  if (item) {
+    item.time = convertTo12hFormat(newTime);
+    item.activity = newActivity;
+    item.note = newNote.trim() || undefined;
+  }
+
+  // Sort and overwrite
+  logs[date] = items.sort((a, b) => convertToMinutes(a.time) - convertToMinutes(b.time));
+
   localStorage.setItem('puppyLogs', JSON.stringify(logs));
-  editing = { date: null, index: null };
+  
+  editing = { date: null, id: null };
   showNoteInput = false;
   renderLogs();
 }
 
-function deleteEntry(date, index) {
-  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
-  logs[date].splice(index, 1);
-  if (logs[date].length === 0) delete logs[date];
-  localStorage.setItem('puppyLogs', JSON.stringify(logs));
-  editing = { date: null, index: null };
-  showNoteInput = false;
-  renderLogs();
-}
 
 function cancelEdit() {
-  editing = { date: null, index: null };
+  editing = { date: null, id: null };
   showNoteInput = false;
   renderLogs();
 }
@@ -264,7 +271,7 @@ function closeClearConfirm() {
 
 function confirmClearLog() {
   localStorage.removeItem('puppyLogs');
-  editing = { date: null, index: null };
+  editing = { date: null, id: null };
   showNoteInput = false;
   closeClearConfirm();
   renderLogs();
@@ -308,6 +315,14 @@ function openModal() {
 function closeModal() {
   document.getElementById('modal').classList.remove('flex');
   document.getElementById('modal').classList.add('hidden');
+}
+
+function convertToMinutes(timeString) {
+  const [time, modifier] = timeString.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + minutes;
 }
 
 renderLogs();
