@@ -36,7 +36,7 @@
   <div class="w-full max-w-md space-y-6">
     <div id="logList"></div>
 
-    <button onclick="clearLog()" class="text-sm text-red-500 hover:underline">Clear All Entries</button>
+    <button onclick="openClearConfirm()" class="text-sm text-red-500 hover:underline">Clear All Entries</button>
   </div>
 
   <div class="mt-8 text-xs text-gray-500">
@@ -58,6 +58,19 @@
       <button onclick="closeModal()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Close</button>
     </div>
   </div>
+
+  <!-- Clear Confirmation Modal -->
+  <div id="clearConfirmModal" class="fixed inset-0 hidden items-center justify-center modal z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
+      <h2 class="text-xl font-bold mb-4">Are you sure?</h2>
+      <p class="text-sm mb-6">This will delete all your logged puppy activities. This cannot be undone.</p>
+      <div class="flex justify-center space-x-4">
+        <button onclick="confirmClearLog()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Yes, Clear</button>
+        <button onclick="closeClearConfirm()" class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
 
 <script>
 let longPressTimer = null;
@@ -288,6 +301,24 @@ function openModal() {
 function closeModal() {
   document.getElementById('modal').classList.remove('flex');
   document.getElementById('modal').classList.add('hidden');
+}
+
+function openClearConfirm() {
+  document.getElementById('clearConfirmModal').classList.remove('hidden');
+  document.getElementById('clearConfirmModal').classList.add('flex');
+}
+
+function closeClearConfirm() {
+  document.getElementById('clearConfirmModal').classList.remove('flex');
+  document.getElementById('clearConfirmModal').classList.add('hidden');
+}
+
+function confirmClearLog() {
+  localStorage.removeItem('puppyLogs');
+  editing = { date: null, index: null };
+  showNoteInput = false;
+  closeClearConfirm();
+  renderLogs();
 }
 
 renderLogs();
