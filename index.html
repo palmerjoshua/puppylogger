@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puppy Logger</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .editing {
+      background-color: #fef9c3;
+    }
+    .modal {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .truncate-note {
+      max-width: 100%;
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+  <h1 class="text-2xl font-bold mb-6">🐶 Puppy Activity Logger</h1>
+
+  <div class="grid grid-cols-2 gap-4 mb-6 w-full max-w-sm">
+    <button onclick="logActivity('🍴 Feed')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded">🍴 Feed</button>
+    <button onclick="logActivity('🛏 Nap')" class="bg-purple-400 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded">🛏 Nap</button>
+    <button onclick="logActivity('⚽ Play')" class="bg-green-400 hover:bg-green-500 text-white font-bold py-2 px-4 rounded">⚽ Play</button>
+    <button onclick="logActivity('💧 Pee')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded">💧 Pee</button>
+    <button onclick="logActivity('💩 Poop')" class="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded col-span-2">💩 Poop</button>
+  </div>
+
+  <div class="w-full max-w-md space-y-6">
+    <div id="logList"></div>
+
+    <button onclick="clearLog()" class="text-sm text-red-500 hover:underline">Clear All Entries</button>
+  </div>
+
+  <div class="mt-8 text-xs text-gray-500">
+    <a href="#" onclick="openModal()" class="underline">Privacy Policy</a>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center modal z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
+      <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
+      <p class="mb-4 text-sm">
+        This site uses local storage to keep your puppy activity logs private on your own device.
+        We do not collect, store, or transmit any personal data to our servers or third parties.
+        <br><br>
+        If ads are displayed, third-party advertisers may use cookies to serve ads based on your prior visits to this site or other websites.
+        <br><br>
+        As an Amazon Associate, I earn from qualifying purchases.
+      </p>
+      <button onclick="closeModal()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Close</button>
+    </div>
+  </div>
+
+<script>
+let longPressTimer = null;
+let editing = { date: null, index: null };
+let showNoteInput = false;
+
+const activities = [
+  { emoji: "🍴", label: "Feed" },
+  { emoji: "🛏", label: "Nap" },
+  { emoji: "⚽", label: "Play" },
+  { emoji: "💧", label: "Pee" },
+  { emoji: "💩", label: "Poop" }
+];
+
+function logActivity(activity) {
+  const now = new Date();
+  const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const today = now.toISOString().split('T')[0];
+
+  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
+
+  if (!logs[today]) {
+    logs[today] = [];
+  }
+  logs[today].unshift({ time: timeString, activity });
+
+  localStorage.setItem('puppyLogs', JSON.stringify(logs));
+  renderLogs();
+}
+
+function renderLogs() {
+  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
+  const logList = document.getElementById('logList');
+  logList.innerHTML = '';
+
+  const dates = Object.keys(logs).sort((a, b) => b.localeCompare(a));
+
+  dates.forEach(date => {
+    const section = document.createElement('div');
+    section.className = 'bg-white shadow rounded-lg p-4 mb-6';
+
+    const title = document.createElement('h3');
+    title.className = 'text-md font-bold mb-2';
+    title.textContent = formatDate(date);
+    section.appendChild(title);
+
+    logs[date].forEach((item, idx) => {
+      const li = document.createElement('div');
+      li.className = 'border-b last:border-0 pb-2 flex flex-col';
+
+      if (editing.date === date && editing.index === idx) {
+        li.classList.add('editing');
+
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.value = convertTo24hFormat(item.time);
+        timeInput.className = 'border rounded p-1 mb-2';
+
+        const activitySelect = document.createElement('select');
+        activitySelect.className = 'border rounded p-1 mb-2';
+        activities.forEach(act => {
+          const option = document.createElement('option');
+          option.value = `${act.emoji} ${act.label}`;
+          option.textContent = `${act.emoji} ${act.label}`;
+          if (item.activity === `${act.emoji} ${act.label}`) {
+            option.selected = true;
+          }
+          activitySelect.appendChild(option);
+        });
+
+        const noteLink = document.createElement('button');
+        noteLink.textContent = item.note ? "Edit Note" : "Add Note";
+        noteLink.className = 'text-blue-500 text-sm underline mb-2 text-left';
+        noteLink.onclick = () => {
+          showNoteInput = true;
+          renderLogs();
+        };
+
+        const noteInput = document.createElement('textarea');
+        noteInput.className = 'border rounded p-1 mb-2 w-full';
+        noteInput.placeholder = 'Enter note...';
+        noteInput.value = item.note || '';
+        if (!showNoteInput) {
+          noteInput.classList.add('hidden');
+        }
+
+        const buttonRow = document.createElement('div');
+        buttonRow.className = 'flex space-x-2';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.className = 'text-green-600 underline';
+        saveBtn.onclick = () => saveEdit(date, idx, timeInput.value, activitySelect.value, noteInput.value);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'text-gray-500 underline';
+        cancelBtn.onclick = cancelEdit;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'text-red-500 underline';
+        deleteBtn.onclick = () => deleteEntry(date, idx);
+
+        buttonRow.appendChild(saveBtn);
+        buttonRow.appendChild(cancelBtn);
+        buttonRow.appendChild(deleteBtn);
+
+        li.appendChild(timeInput);
+        li.appendChild(activitySelect);
+        li.appendChild(noteLink);
+        li.appendChild(noteInput);
+        li.appendChild(buttonRow);
+
+      } else {
+        const mainContent = document.createElement('div');
+        mainContent.className = 'flex flex-col';
+
+        let noteText = '';
+        if (item.note) {
+          const displayNote = item.note.length > 50 ? item.note.slice(0, 50) + "..." : item.note;
+          noteText = `<span class="italic truncate-note text-gray-500" title="${item.note}">"${displayNote}"</span>`;
+        }
+
+        mainContent.innerHTML = `
+          <span class="font-semibold">${item.time}</span>
+          <span>${item.activity}${noteText ? ' - ' + noteText : ''}</span>
+        `;
+
+        li.appendChild(mainContent);
+
+        li.addEventListener('mousedown', (e) => startLongPress(e, date, idx));
+        li.addEventListener('touchstart', (e) => startLongPress(e, date, idx));
+        li.addEventListener('mouseup', cancelLongPress);
+        li.addEventListener('mouseleave', cancelLongPress);
+        li.addEventListener('touchend', cancelLongPress);
+      }
+
+      section.appendChild(li);
+    });
+
+    logList.appendChild(section);
+  });
+}
+
+function startLongPress(e, date, index) {
+  cancelLongPress();
+  longPressTimer = setTimeout(() => {
+    editing = { date, index };
+    showNoteInput = false;
+    renderLogs();
+  }, 500);
+}
+
+function cancelLongPress() {
+  clearTimeout(longPressTimer);
+}
+
+function saveEdit(date, index, newTime, newActivity, newNote) {
+  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
+  logs[date][index].time = convertTo12hFormat(newTime);
+  logs[date][index].activity = newActivity;
+  logs[date][index].note = newNote.trim() || undefined;
+  localStorage.setItem('puppyLogs', JSON.stringify(logs));
+  editing = { date: null, index: null };
+  showNoteInput = false;
+  renderLogs();
+}
+
+function deleteEntry(date, index) {
+  const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
+  logs[date].splice(index, 1);
+  if (logs[date].length === 0) delete logs[date];
+  localStorage.setItem('puppyLogs', JSON.stringify(logs));
+  editing = { date: null, index: null };
+  showNoteInput = false;
+  renderLogs();
+}
+
+function cancelEdit() {
+  editing = { date: null, index: null };
+  showNoteInput = false;
+  renderLogs();
+}
+
+function clearLog() {
+  localStorage.removeItem('puppyLogs');
+  editing = { date: null, index: null };
+  showNoteInput = false;
+  renderLogs();
+}
+
+function convertTo24hFormat(time12h) {
+  const [time, modifier] = time12h.split(' ');
+  let [hours, minutes] = time.split(':');
+  if (hours === '12') hours = '00';
+  if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+}
+
+function convertTo12hFormat(time24h) {
+  let [hours, minutes] = time24h.split(':');
+  let modifier = 'AM';
+  hours = parseInt(hours, 10);
+  if (hours >= 12) {
+    modifier = 'PM';
+    if (hours > 12) hours -= 12;
+  } else if (hours === 0) {
+    hours = 12;
+  }
+  return `${hours}:${minutes} ${modifier}`;
+}
+
+function formatDate(isoDate) {
+  const [year, month, day] = isoDate.split('-');
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  return `${months[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+}
+
+function openModal() {
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modal').classList.add('flex');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('flex');
+  document.getElementById('modal').classList.add('hidden');
+}
+
+renderLogs();
+</script>
+
+</body>
+</html>
