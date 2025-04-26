@@ -29,10 +29,10 @@ Hosted via GitHub Pages.
 (Full privacy policy available inside the app via the Privacy Policy link.)
 
 ## Live Site
-[Your Live Site URL Here Once Deployed]
+[puppylogger.com](https://puppylogger.com)
 
 ## License
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+TBD
 
 ---
 
