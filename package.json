@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "powershell remove-item -path ./dist/ -recurse -force && powershell mkdir -p ./dist",
     "build:css": "npx @tailwindcss/cli -i styles.css -o dist/styles.css --minify",
-    "copy:static": "powershell cp -path index.html, index.js -destination './dist/'",
+    "copy:static": "powershell cp -path index.html, blog.html, index.js -destination './dist/'",
     "minify:html": "npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true dist/index.html -o dist/index.html",
     "minify:js": "npx terser dist/index.js -c -m -o dist/index.js",
     "build": "npm run clean && npm run build:css && npm run copy:static && npm run minify:html && npm run minify:js"
