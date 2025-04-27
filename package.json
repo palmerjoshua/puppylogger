@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "npx rimraf dist",
     "build:css": "npx @tailwindcss/cli -i styles.css -o dist/styles.css --minify",
-    "copy:static": "npx cpx \"*.{html,js}\" dist",
+    "copy:static": "npx cpx \"*.{html,js}\" dist && npx cpx CNAME dist/ && npx cpx ads.txt dist",
     "minify:html": "npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true --input-dir dist --output-dir dist --file-ext html",
     "minify:js": "npx terser dist/index.js -c -m -o dist/index.js",
     "build": "npm run clean && npm run build:css && npm run copy:static && npm run minify:html && npm run minify:js"
