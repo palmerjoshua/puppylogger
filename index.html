@@ -61,10 +61,25 @@
       </form>
     </section>
 
+    <section aria-label="jump-controls" class="jump-controls flex justify-between mb-4">
+        <form id="top-jump-form" role="group" aria-label="Jump to region">
+            <button type="button" onclick="scrollToBottom()" class="px-3 py-1 rounded border">Jump to bottom</button>
+            <button type="button" onclick="openDatePicker()" class="px-3 py-1 rounded border">Jump to date</button>
+            <input type="date" id="datePicker" class="hidden ml-2 border rounded px-2 py-1" />
+        </form>
+    </section>
+
     <section aria-labelledby="log-list">
       <h2 id="log-list" class="sr-only">Activity Logs</h2>
       <ul id="logList" class="list-none p-0 space-y-6 w-full max-w-md"></ul>
       <button type="button" onclick="openClearConfirm()" class="text-sm text-red-700 hover:underline">Clear All Entries</button>
+    </section>
+
+    <section aria-label="bottom-jump-controls" class="jump-controls flex justify-between mt-4">
+        <form id="bottom-jump-form">
+            <button type="button" onclick="scrollToTop()" class="px-3 py-1 rounded border">Jump to top</button>
+            <button type="button" onclick="openDatePicker()" class="px-3 py-1 rounded border">Jump to date</button>
+        </form>
     </section>
   </main>
 
@@ -114,7 +129,12 @@
     function logActivity(activity) {
       const now = new Date();
       const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const today = now.toISOString().split('T')[0];
+      // new: local date
+      const year  = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day   = String(now.getDate()       ).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
       const logs = JSON.parse(localStorage.getItem('puppyLogs')) || {};
       if (!logs[today]) logs[today] = [];
       logs[today].unshift({ id: Date.now(), time: timeString, activity });
@@ -129,10 +149,13 @@
       logList.innerHTML = '';
       const dates = Object.keys(logs).sort((a, b) => b.localeCompare(a));
 
-      dates.forEach(date => {
+      dates.forEach((date, idx) => {
         const dateItem = document.createElement('li');
         const section = document.createElement('section');
         section.className = 'bg-white shadow rounded-lg p-4';
+        section.setAttribute('data-date', date);
+        section.id = `section-${date}`;
+
 
         const title = document.createElement('h3');
         title.className = 'text-md font-bold mb-2';
@@ -239,8 +262,20 @@
 
         dateItem.appendChild(section);
         logList.appendChild(dateItem);
+        if (idx < dates.length - 1) {
+            const nav = document.createElement('div');
+            nav.className = 'flex space-x-2 mt-2';
+            nav.innerHTML = `
+            <section aria-label="jump-controls-${idx}" class="jump-controls">
+            <button onclick="scrollToTop()"     class="px-2 py-1 text-xs rounded border">↑ Top</button>
+            <button onclick="scrollToBottom()"  class="px-2 py-1 text-xs rounded border">↓ Bottom</button>
+            </section>
+            `;
+            section.after(nav);
+        }
         lastEditing = { date: editing.date, id: editing.id };
       });
+      updateJumpControlsVisibility();
     }
 
     function saveEdit(date, id, newTime24, newActivity, newNote, newEnd24) {
@@ -288,6 +323,7 @@
       cancelEdit();
       closeClearConfirm();
       renderLogs();
+      updateJumpControlsVisibility();
     }
 
     function openModal() {
@@ -330,6 +366,47 @@
       ];
       return `${months[month - 1]} ${day}, ${year}`;
     }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function scrollToBottom() {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function updateJumpControlsVisibility() {
+  const scrollable = document.documentElement.scrollHeight > window.innerHeight;
+  document.querySelectorAll('.jump-controls').forEach(el => {
+    el.style.display = scrollable ? 'flex' : 'none';
+  });
+}
+
+    window.addEventListener('load',  updateJumpControlsVisibility);
+    window.addEventListener('resize', updateJumpControlsVisibility);
+
+    function openDatePicker() {
+  const picker = document.getElementById('datePicker');
+  picker.classList.remove('hidden');
+  picker.focus();
+}
+
+document.getElementById('datePicker').addEventListener('change', (e) => {
+  const date = e.target.value; // "YYYY-MM-DD"
+  e.target.classList.add('hidden');
+
+  // find the exact day's section
+  const section = document.querySelector(`section[data-date="${date}"]`);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    alert(`No entries for ${date}`);
+  }
+
+  // reset for next time
+  e.target.value = '';
+});
+
 
     // Initial render
     renderLogs();
