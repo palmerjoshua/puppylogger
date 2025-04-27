@@ -3,7 +3,7 @@ name: Deploy Puppy Logger site
 on:
   push:
     branches:
-      - build-tailwinds-locally-and-minify # change this to main later
+      - main # change this to main later
 
 jobs:
   deploy:
