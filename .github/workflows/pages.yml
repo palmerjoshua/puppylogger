@@ -1,0 +1,22 @@
+name: Deploy Puppy Logger site
+
+on:
+  push:
+    branches:
+      - build-tailwinds-locally-and-minify # change this to main later
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies & build
+        run: |
+          npm ci
+          npm run build   # your script that outputs to dist/
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
