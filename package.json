@@ -4,10 +4,10 @@
   "description": "A simple, mobile-friendly web app to track your new puppy's activities — naps, feedings, playtime, pee, and poop — with one-tap logging.",
   "main": "index.js",
   "scripts": {
-    "clean": "powershell remove-item -path ./dist/ -recurse -force && powershell mkdir -p ./dist",
+    "clean": "npx rimraf dist",
     "build:css": "npx @tailwindcss/cli -i styles.css -o dist/styles.css --minify",
-    "copy:static": "powershell cp -path index.html, blog.html, index.js -destination './dist/'",
-    "minify:html": "npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true dist/index.html -o dist/index.html",
+    "copy:static": "npx cpx \"*.{html,js}\" dist",
+    "minify:html": "npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true --input-dir dist --output-dir dist --file-ext html",
     "minify:js": "npx terser dist/index.js -c -m -o dist/index.js",
     "build": "npm run clean && npm run build:css && npm run copy:static && npm run minify:html && npm run minify:js"
   },
@@ -24,7 +24,9 @@
   },
   "homepage": "https://github.com/palmerjoshua/puppylogger.com#readme",
   "devDependencies": {
+    "cpx": "^1.2.1",
     "html-minifier-terser": "^7.2.0",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.4",
     "terser": "^5.39.0"
   },
