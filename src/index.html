@@ -89,10 +89,25 @@
     <header
       class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
     >
-      <a href="/" class="text-2xl font-bold">🐶 Puppy Logger</a>
+      <a
+        href="/"
+        class="text-2xl font-bold"
+        data-ga-event="nav_logo_from_home_click"
+        >🐶 Puppy Logger</a
+      >
       <nav aria-label="Main navigation">
-        <a href="/" class="text-gray-700 hover:text-gray-900 px-3">Home</a>
-        <a href="/blog" class="text-gray-700 hover:text-gray-900 px-3">Blog</a>
+        <a
+          href="/"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_home_from_home_click"
+          >Home</a
+        >
+        <a
+          href="/blog"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_blog_from_home_click"
+          >Blog</a
+        >
       </nav>
     </header>
 
@@ -109,6 +124,7 @@
             type="button"
             onclick="logActivity('🍴 Feed')"
             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            data-ga-event="log_feed"
           >
             🍴 Feed
           </button>
@@ -116,6 +132,7 @@
             type="button"
             onclick="logActivity('🛏 Nap')"
             class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+            data-ga-event="log_nap"
           >
             🛏 Nap
           </button>
@@ -123,6 +140,7 @@
             type="button"
             onclick="logActivity('⚽ Play')"
             class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded"
+            data-ga-event="log_play"
           >
             ⚽ Play
           </button>
@@ -130,6 +148,7 @@
             type="button"
             onclick="logActivity('💧 Pee')"
             class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded"
+            data-ga-event="log_pee"
           >
             💧 Pee
           </button>
@@ -137,6 +156,7 @@
             type="button"
             onclick="logActivity('💩 Poop')"
             class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded col-span-2"
+            data-ga-event="log_poop"
           >
             💩 Poop
           </button>
@@ -152,6 +172,7 @@
             type="button"
             onclick="scrollToBottom()"
             class="px-3 py-1 rounded border"
+            data-ga-event="top_jump_bottom"
           >
             Jump to bottom
           </button>
@@ -159,6 +180,7 @@
             type="button"
             onclick="openDatePicker()"
             class="px-3 py-1 rounded border"
+            data-ga-event="top_pick_date_open"
           >
             Jump to date
           </button>
@@ -166,6 +188,7 @@
             type="date"
             id="datePicker"
             class="hidden ml-2 border rounded px-2 py-1"
+            data-ga-event="top_pick_date_select"
           />
         </form>
       </section>
@@ -257,6 +280,7 @@
         type="button"
         onclick="openClearConfirm()"
         class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-2 rounded"
+        data-ga-event="clear_entries_open"
       >
         Clear All Entries
       </button>
@@ -270,6 +294,7 @@
             type="button"
             onclick="scrollToTop()"
             class="px-3 py-1 rounded border"
+            data-ga-event="bottom_jump_top"
           >
             Jump to top
           </button>
@@ -277,6 +302,7 @@
             type="button"
             onclick="openDatePicker()"
             class="px-3 py-1 rounded border"
+            data-ga-event="bottom_pick_date_open"
           >
             Jump to date
           </button>
@@ -289,6 +315,7 @@
         type="button"
         onclick="openModal()"
         class="text-blue-700 underline"
+        data-ga-event="open_privacy_policy"
       >
         Privacy Policy
       </button>
@@ -352,6 +379,7 @@
             type="button"
             onclick="confirmClearLog()"
             class="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+            data-ga-event="clear_entries_yes"
           >
             Yes, Clear
           </button>
@@ -359,6 +387,7 @@
             type="button"
             onclick="closeClearConfirm()"
             class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+            data-ga-event="clear_entries_no"
           >
             Cancel
           </button>
@@ -367,6 +396,17 @@
     </div>
     <script src="./index.js"></script>
     <script>
+      document.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-ga-event]");
+        if (target) {
+          const action = target.getAttribute("data-ga-event");
+          gtag("event", "control_use", {
+            event_category: "interaction",
+            event_label: action,
+            value: 1,
+          });
+        }
+      });
       renderLogs();
     </script>
   </body>

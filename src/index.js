@@ -63,6 +63,7 @@ function renderLogs() {
           timeInput.type = "time";
           timeInput.value = convertTo24hFormat(item.time);
           timeInput.className = "border rounded p-1 mb-2";
+          timeInput.setAttribute("data-ga-event", "entry_start_time_edit");
           entry.appendChild(timeInput);
 
           let endTimeInput = null;
@@ -73,6 +74,7 @@ function renderLogs() {
               ? convertTo24hFormat(item.endTime)
               : timeInput.value;
             endTimeInput.className = "border rounded p-1 mb-2";
+            endTimeInput.setAttribute("data-ga-event", "entry_end_time_edit");
             entry.appendChild(endTimeInput);
           }
 
@@ -83,6 +85,7 @@ function renderLogs() {
             : "Add End Time";
           endToggle.className =
             "text-blue-700 text-sm underline mb-2 text-left";
+          endToggle.setAttribute("data-ga-event", editing.showEndTime ? "entry_end_time_remove_click" : "entry_end_time_add_click");
           endToggle.onclick = () => {
             editing.showEndTime = !editing.showEndTime;
             renderLogs();
@@ -98,6 +101,7 @@ function renderLogs() {
             if (item.activity === opt.value) opt.selected = true;
             activitySelect.appendChild(opt);
           });
+          activitySelect.setAttribute("data-ga-event", "entry_activity_edit_click")
           entry.appendChild(activitySelect);
 
           const noteBtn = document.createElement("button");
@@ -105,6 +109,7 @@ function renderLogs() {
           noteBtn.textContent = item.note ? "Edit Note" : "Add Note";
           noteBtn.className =
             "text-blue-700 text-sm underline mb-2 text-left";
+          noteBtn.setAttribute("data-ga-event", item.note ? "entry_note_edit_click" : "entry_note_add_click" )
           noteBtn.onclick = () => {
             showNoteInput = true;
             renderLogs();
@@ -134,16 +139,19 @@ function renderLogs() {
               noteInput.value,
               endTimeInput ? endTimeInput.value : ""
             );
+          saveBtn.setAttribute("data-ga-event", "entry_edit_save_click");
           const cancelBtn = document.createElement("button");
           cancelBtn.type = "button";
           cancelBtn.textContent = "Cancel";
           cancelBtn.className = "text-gray-800 underline";
           cancelBtn.onclick = cancelEdit;
+          cancelBtn.setAttribute("data-ga-event", "entry_edit_cancel_click");
           const deleteBtn = document.createElement("button");
           deleteBtn.type = "button";
           deleteBtn.textContent = "Delete";
           deleteBtn.className = "text-red-700 underline";
           deleteBtn.onclick = () => deleteEntry(date, item.id);
+          deleteBtn.setAttribute("data-ga-event", "entry_edit_delete_click");
           btnRow.append(saveBtn, cancelBtn, deleteBtn);
           entry.appendChild(btnRow);
         } else {
@@ -167,6 +175,7 @@ function renderLogs() {
           editBtn.type = "button";
           editBtn.className = "text-blue-700 hover:text-blue-800";
           editBtn.innerText = "✏️";
+          editBtn.setAttribute("data-ga-event", "entry_edit_click")
           editBtn.onclick = () => {
             editing = { date, id: item.id, showEndTime: !!item.endTime };
             showNoteInput = false;
@@ -185,8 +194,8 @@ function renderLogs() {
       nav.className = "flex space-x-2 mt-2";
       nav.innerHTML = `
       <section aria-label="jump-controls-${idx}" class="jump-controls">
-      <button onclick="scrollToTop()"     class="px-2 py-1 text-xs rounded border">↑ Top</button>
-      <button onclick="scrollToBottom()"  class="px-2 py-1 text-xs rounded border">↓ Bottom</button>
+      <button onclick="scrollToTop()" class="px-2 py-1 text-xs rounded border" data-ga-event="middle_scroll_top">↑ Top</button>
+      <button onclick="scrollToBottom()" class="px-2 py-1 text-xs rounded border" data-ga-event="middle_scroll_bottom">↓ Bottom</button>
       </section>
       `;
       section.after(nav);

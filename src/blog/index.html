@@ -74,10 +74,25 @@
     <header
       class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
     >
-      <a href="/" class="text-2xl font-bold">🐶 Puppy Logger</a>
+      <a
+        href="/"
+        class="text-2xl font-bold"
+        data-ga-event="nav_logo_from_blog_click"
+        >🐶 Puppy Logger</a
+      >
       <nav aria-label="Main navigation">
-        <a href="/" class="text-gray-700 hover:text-gray-900 px-3">Home</a>
-        <a href="/blog" class="text-gray-700 hover:text-gray-900 px-3">Blog</a>
+        <a
+          href="/"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_home_from_blog_click"
+          >Home</a
+        >
+        <a
+          href="/blog"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_blog_from_blog_click"
+          >Blog</a
+        >
       </nav>
     </header>
     <div class="blog-container">
@@ -100,7 +115,12 @@
             the day.
           </p>
         </div>
-        <a class="read-more" href="/blog/structured-puppy-naps/">Read More</a>
+        <a
+          class="read-more"
+          href="/blog/structured-puppy-naps/"
+          data-ga-event="blog_read_more_click"
+          >Read More</a
+        >
       </div>
 
       <!-- Blog Post 2 -->
@@ -124,12 +144,28 @@
             understanding your puppy's natural tendencies and body clock.
           </p>
         </div>
-        <a class="read-more" href="/blog/logging-puppy-activities/"
+        <a
+          class="read-more"
+          href="/blog/logging-puppy-activities/"
+          data-ga-event="blog_read_more_click"
           >Read More</a
         >
       </div>
 
       <!-- Add more cards here as you add more blog posts -->
     </div>
+    <script>
+      document.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-ga-event]");
+        if (target) {
+          const action = target.getAttribute("data-ga-event");
+          gtag("event", "control_use", {
+            event_category: "interaction",
+            event_label: action,
+            value: 1,
+          });
+        }
+      });
+    </script>
   </body>
 </html>

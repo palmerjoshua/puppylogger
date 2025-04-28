@@ -31,10 +31,25 @@
     <header
       class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
     >
-      <a href="/" class="text-2xl font-bold">🐶 Puppy Logger</a>
+      <a
+        href="/"
+        class="text-2xl font-bold"
+        data-ga-event="nav_logo_from_blogpost_click"
+        >🐶 Puppy Logger</a
+      >
       <nav aria-label="Main navigation">
-        <a href="/" class="text-gray-700 hover:text-gray-900 px-3">Home</a>
-        <a href="/blog" class="text-gray-700 hover:text-gray-900 px-3">Blog</a>
+        <a
+          href="/"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_home_from_blogpost_click"
+          >Home</a
+        >
+        <a
+          href="/blog"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_blog_from_blogpost_click"
+          >Blog</a
+        >
       </nav>
     </header>
 
@@ -121,5 +136,18 @@
     <footer class="w-full max-w-md text-center text-xs text-gray-500 mt-8">
       © 2025 Joshua Palmer. All rights reserved.
     </footer>
+    <script>
+      document.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-ga-event]");
+        if (target) {
+          const action = target.getAttribute("data-ga-event");
+          gtag("event", "control_use", {
+            event_category: "interaction",
+            event_label: action,
+            value: 1,
+          });
+        }
+      });
+    </script>
   </body>
 </html>
