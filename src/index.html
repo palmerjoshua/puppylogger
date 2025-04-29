@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-WRLC5VDR43"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-WRLC5VDR43");
-    </script>
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-5275935514649197" />
@@ -33,7 +19,6 @@
       .editing {
         padding: 0.5rem;
         border-radius: 0.5rem;
-        margin-top: 0.4rem;
       }
 
       .editing input,
@@ -86,6 +71,38 @@
     </style>
   </head>
   <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <!-- GDPR Cookie Consent Banner -->
+    <div
+      id="cookie-banner"
+      class="fixed bottom-0 inset-x-0 bg-gray-800 text-white p-4 flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:space-x-4 z-50"
+      role="dialog"
+      aria-live="polite"
+      aria-label="Cookie consent"
+      style="display: none"
+    >
+      <p class="text-sm flex-1">
+        We use cookies for analytics to improve your experience. By clicking
+        “Accept”, you consent to our use of non-essential cookies.
+        <a href="/privacy" class="underline hover:text-gray-300 ml-1"
+          >Learn more</a
+        >.
+      </p>
+      <div class="flex-shrink-0 space-x-2">
+        <button
+          id="cookie-accept"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Accept
+        </button>
+        <button
+          id="cookie-decline"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Decline
+        </button>
+      </div>
+    </div>
+
     <header
       class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
     >
@@ -107,6 +124,12 @@
           class="text-gray-700 hover:text-gray-900 px-3"
           data-ga-event="nav_blog_from_home_click"
           >Blog</a
+        >
+        <a
+          href="/privacy"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_privacy_from_privacy_click"
+          >Privacy</a
         >
       </nav>
     </header>
@@ -311,52 +334,8 @@
     </main>
 
     <footer class="w-full max-w-md text-center text-xs text-gray-500 mt-8">
-      <button
-        type="button"
-        onclick="openModal()"
-        class="text-blue-700 underline"
-        data-ga-event="open_privacy_policy"
-      >
-        Privacy Policy
-      </button>
       <p class="mt-2">© 2025 Joshua Palmer. All rights reserved.</p>
     </footer>
-
-    <!-- Privacy Policy Modal -->
-    <div
-      id="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="privacy-title"
-      class="fixed inset-0 hidden items-center justify-center modal z-50"
-    >
-      <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-        <h2 id="privacy-title" class="text-xl font-bold mb-4">
-          Privacy Policy
-        </h2>
-        <p class="mb-4 text-sm">
-          This site uses local storage to keep your puppy activity logs private
-          on your own device.<br /><br />
-          We do not collect, store, or transmit any personal data or puppy
-          activity data.<br /><br />
-          We use Google Analytics to track anonymized usage metrics on the
-          website. We use this only to measure how the site is used and to make
-          decisions on how to improve it.<br /><br />
-          If ads are displayed, third-party advertisers may use cookies to serve
-          ads based on your prior visits.<br /><br />
-          If Amazon links are displayed, we may earn a percentage of the sale if
-          you buy products using our links. We don't track purchases in any
-          way.<br /><br />
-        </p>
-        <button
-          type="button"
-          onclick="closeModal()"
-          class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-        >
-          Close
-        </button>
-      </div>
-    </div>
 
     <!-- Clear Confirmation Modal -->
     <div
@@ -394,19 +373,24 @@
         </div>
       </div>
     </div>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
     <script src="./index.js"></script>
+    <script src="./cookie-consent.js"></script>
     <script>
-      document.addEventListener("click", function (event) {
-        const target = event.target.closest("[data-ga-event]");
-        if (target) {
-          const action = target.getAttribute("data-ga-event");
-          gtag("event", "control_use", {
-            event_category: "interaction",
-            event_label: action,
-            value: 1,
-          });
-        }
-      });
+      const consent = localStorage.getItem("cookieConsent");
+      if (consent === "accepted") {
+        document.addEventListener("click", function (event) {
+          const target = event.target.closest("[data-ga-event]");
+          if (target) {
+            const action = target.getAttribute("data-ga-event");
+            gtag("event", "control_use", {
+              event_category: "interaction",
+              event_label: action,
+              value: 1,
+            });
+          }
+        });
+      }
       renderLogs();
     </script>
   </body>

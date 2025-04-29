@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-5275935514649197" />
+    <meta
+      name="description"
+      content="Privacy Policy for Puppy Logger — how we handle your data and cookies."
+    />
+    <title>Privacy Policy – Puppy Logger</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <!-- GDPR Cookie Consent Banner -->
+    <div
+      id="cookie-banner"
+      class="fixed bottom-0 inset-x-0 bg-gray-800 text-white p-4 flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:space-x-4 z-50"
+      role="dialog"
+      aria-live="polite"
+      aria-label="Cookie consent"
+      style="display: none"
+    >
+      <p class="text-sm flex-1">
+        We use cookies for analytics to improve your experience. By clicking
+        “Accept”, you consent to our use of non-essential cookies.
+        <a href="../privacy/" class="underline hover:text-gray-300 ml-1"
+          >Learn more</a
+        >.
+      </p>
+      <div class="flex-shrink-0 space-x-2">
+        <button
+          id="cookie-accept"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Accept
+        </button>
+        <button
+          id="cookie-decline"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Decline
+        </button>
+      </div>
+    </div>
+
+    <!-- Header / Navigation -->
+    <header
+      class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
+    >
+      <a
+        href="../"
+        class="text-2xl font-bold"
+        data-ga-event="nav_logo_from_privacy_click"
+        >🐶 Puppy Logger</a
+      >
+      <nav aria-label="Main navigation">
+        <a
+          href="../"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_home_from_privacy_click"
+          >Home</a
+        >
+        <a
+          href="../blog"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_blog_from_privacy_click"
+          >Blog</a
+        >
+        <a
+          href="../privacy/"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_privacy_from_privacy_click"
+          >Privacy</a
+        >
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-md space-y-6">
+      <!-- Privacy Policy Card -->
+      <article class="bg-white p-6 rounded-lg shadow mb-6">
+        <h1 class="text-2xl font-bold mb-4">Privacy Policy</h1>
+        <p class="text-sm mb-4">
+          This site stores all your puppy activity data in your browser’s local
+          storage. None of your puppy data is transmitted across the internet.
+        </p>
+        <p class="text-sm mb-4">
+          We do not collect, store, or transmit any personal data of any kind.
+        </p>
+        <p class="text-sm mb-4">
+          The only cookies used on this site are for Google Analytics. We
+          collect anonymized usage data so that we can measure how our website
+          is used and make improvements.
+        </p>
+        <p class="text-sm mb-4">
+          If advertisements are displayed, third-party advertisers may use
+          cookies to serve ads based on your prior visits.
+        </p>
+        <p class="text-sm mb-4">
+          If product links are displayed, we may earn a commission on qualifying
+          purchases, but we do not track any purchase details.
+        </p>
+      </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-md text-center text-xs text-gray-500 mt-8">
+      <p class="mt-2">© 2025 Joshua Palmer. All rights reserved.</p>
+    </footer>
+
+    <!-- Cookie consent script -->
+    <script src="../cookie-consent.js"></script>
+    <script>
+      // GA event delegation (only after consent)
+      const consent = localStorage.getItem("cookieConsent");
+      if (consent === "accepted") {
+        document.addEventListener("click", function (event) {
+          const target = event.target.closest("[data-ga-event]");
+          if (target) {
+            const action = target.getAttribute("data-ga-event");
+            gtag("event", "control_use", {
+              event_category: "interaction",
+              event_label: action,
+              value: 1,
+            });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

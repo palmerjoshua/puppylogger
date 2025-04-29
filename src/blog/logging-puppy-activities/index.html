@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-WRLC5VDR43"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-WRLC5VDR43");
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-5275935514649197" />
@@ -27,6 +14,37 @@
     <link rel="stylesheet" href="../../styles.css" />
   </head>
   <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <!-- GDPR Cookie Consent Banner -->
+    <div
+      id="cookie-banner"
+      class="fixed bottom-0 inset-x-0 bg-gray-800 text-white p-4 flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 md:space-x-4 z-50"
+      role="dialog"
+      aria-live="polite"
+      aria-label="Cookie consent"
+      style="display: none"
+    >
+      <p class="text-sm flex-1">
+        We use cookies for analytics to improve your experience. By clicking
+        “Accept”, you consent to our use of non-essential cookies.
+        <a href="../../privacy/" class="underline hover:text-gray-300 ml-1"
+          >Learn more</a
+        >.
+      </p>
+      <div class="flex-shrink-0 space-x-2">
+        <button
+          id="cookie-accept"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Accept
+        </button>
+        <button
+          id="cookie-decline"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-3 rounded"
+        >
+          Decline
+        </button>
+      </div>
+    </div>
     <!-- shared nav bar -->
     <header
       class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
@@ -49,6 +67,12 @@
           class="text-gray-700 hover:text-gray-900 px-3"
           data-ga-event="nav_blog_from_blogpost_click"
           >Blog</a
+        >
+        <a
+          href="../../privacy"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_privacy_from_privacy_click"
+          >Privacy</a
         >
       </nav>
     </header>
@@ -117,6 +141,7 @@
               quick insights, helping you recognize patterns and adjust routines
               easily.
             </p>
+            q
 
             <p>
               <strong
@@ -136,18 +161,23 @@
     <footer class="w-full max-w-md text-center text-xs text-gray-500 mt-8">
       © 2025 Joshua Palmer. All rights reserved.
     </footer>
+    <script src="../../cookie-consent.js"></script>
     <script>
-      document.addEventListener("click", function (event) {
-        const target = event.target.closest("[data-ga-event]");
-        if (target) {
-          const action = target.getAttribute("data-ga-event");
-          gtag("event", "control_use", {
-            event_category: "interaction",
-            event_label: action,
-            value: 1,
-          });
-        }
-      });
+      const consent = localStorage.getItem("cookieConsent");
+      if (consent === "accepted") {
+        document.addEventListener("click", function (event) {
+          const target = event.target.closest("[data-ga-event]");
+          if (target) {
+            const action = target.getAttribute("data-ga-event");
+            gtag("event", "control_use", {
+              event_category: "interaction",
+              event_label: action,
+              value: 1,
+            });
+          }
+        });
+      }
+      renderLogs();
     </script>
   </body>
 </html>
