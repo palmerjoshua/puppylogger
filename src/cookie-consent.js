@@ -28,6 +28,7 @@
   btnDecline.addEventListener('click', () => {
     localStorage.setItem(storageKey, 'declined');
     banner.style.display = 'none';
+    offerOptIn();
   });
 
   // Only after consent do we load analytics (or other scripts)

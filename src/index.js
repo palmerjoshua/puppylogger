@@ -10,8 +10,10 @@ let showNoteInput = false;
 
 const activities = [
   { emoji: "🍴", label: "Feed" },
-  { emoji: "🛏", label: "Nap" },
+  { emoji: "🛏", label: "Sleep" },
   { emoji: "⚽", label: "Play" },
+  { emoji: "🎓", label: "Train" },
+  { emoji: "🚶", label: "Walk" },
   { emoji: "💧", label: "Pee" },
   { emoji: "💩", label: "Poop" },
 ];

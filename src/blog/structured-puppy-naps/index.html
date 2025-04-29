@@ -14,7 +14,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Puppy Logger Blog</title>
     <link rel="icon" href="data:image/svg+xml,…" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/hamburgers@1.1.3/dist/hamburgers.min.css"
+    />
     <link rel="stylesheet" href="../../styles.css" />
+    <style>
+      @media (min-width: 48rem) {
+        .js-hamburger {
+          display: none !important;
+        }
+      }
+    </style>
   </head>
   <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
     <!-- GDPR Cookie Consent Banner -->
@@ -27,9 +38,11 @@
       style="display: none"
     >
       <p class="text-sm flex-1">
-        We use cookies for analytics to improve your experience. By clicking
-        “Accept”, you consent to our use of non-essential cookies.
-        <a href="../../privacy/" class="underline hover:text-gray-300 ml-1"
+        We use cookies only for analytics to improve your experience on this
+        website. We don't track your activity on any other websites. By clicking
+        “Accept”, you consent to our use of non-essential cookies to help make
+        our website better.
+        <a href="../privacy/" class="underline hover:text-gray-300 ml-1"
           >Learn more</a
         >.
       </p>
@@ -50,7 +63,7 @@
     </div>
     <!-- shared nav bar -->
     <header
-      class="w-full max-w-md mx-auto flex justify-between items-center py-4 px-2 bg-white shadow mb-6 rounded"
+      class="w-full max-w-xl mx-auto flex justify-between items-center py-4 px-4 bg-white shadow mb-6 rounded"
     >
       <a
         href="/"
@@ -58,12 +71,64 @@
         data-ga-event="nav_logo_from_blogpost_click"
         >🐶 Puppy Logger</a
       >
-      <nav aria-label="Main navigation">
+      <button
+        class="hamburger hamburger--spring js-hamburger block md:hidden"
+        type="button"
+        aria-label="Toggle menu"
+        aria-controls="main-nav"
+        aria-expanded="false"
+        data-ga-event="hamburger-click"
+      >
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
+      <nav
+        id="main-nav"
+        class="hidden flex-col space-y-2 mt-4 md:hidden"
+        aria-label="Mobile navigation"
+      >
+        <a
+          href="/"
+          class="block px-3 py-2"
+          data-ga-event="nav_home_from_home_click"
+          >Home</a
+        >
+        <a
+          href="/about"
+          class="block px-3 py-2"
+          data-ga-event="nav_about_from_home_click"
+          >About</a
+        >
+        <a
+          href="/blog"
+          class="block px-3 py-2"
+          data-ga-event="nav_blog_from_home_click"
+          >Blog</a
+        >
+        <a
+          href="/privacy"
+          class="block px-3 py-2"
+          data-ga-event="nav_privacy_from_home_click"
+          >Privacy</a
+        >
+      </nav>
+      <nav
+        id="desktop-nav"
+        aria-label="Main navigation"
+        class="hidden md:flex space-x-4 whitespace-nowrap"
+      >
         <a
           href="/"
           class="text-gray-700 hover:text-gray-900 px-3"
           data-ga-event="nav_home_from_blogpost_click"
           >Home</a
+        >
+        <a
+          href="/about"
+          class="text-gray-700 hover:text-gray-900 px-3"
+          data-ga-event="nav_about_from_blogpost_click"
+          >About</a
         >
         <a
           href="/blog"
@@ -72,7 +137,7 @@
           >Blog</a
         >
         <a
-          href="../../privacy"
+          href="/privacy"
           class="text-gray-700 hover:text-gray-900 px-3"
           data-ga-event="nav_privacy_from_privacy_click"
           >Privacy</a
@@ -80,7 +145,7 @@
       </nav>
     </header>
 
-    <main class="flex-grow w-full max-w-md space-y-6">
+    <main class="flex-grow w-full max-w-xl space-y-6">
       <div class="space-y-6">
         <!-- Example post card -->
         <article class="bg-white p-6 rounded-lg shadow">
@@ -169,6 +234,7 @@
     <footer class="w-full max-w-md text-center text-xs text-gray-500 mt-8">
       © 2025 Joshua Palmer. All rights reserved.
     </footer>
+    <script src="../../common.js"></script>
     <script src="../../cookie-consent.js"></script>
     <script>
       const consent = localStorage.getItem("cookieConsent");
