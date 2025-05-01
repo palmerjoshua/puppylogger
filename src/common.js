@@ -7,13 +7,13 @@ hamburberBtn.addEventListener('click', () => {
 });
 
 function offerOptIn () {
-  const optSpan = document.getElementById("opt-back-in");
+  const optInP = document.getElementById("opt-back-in");
   const banner = document.getElementById("cookie-banner");
   const consent = localStorage.getItem("cookieConsent");
 
-  if (consent === "declined" && optSpan) {
-    optSpan.innerHTML =
-      '<strong>Want to opt back in? Click <a href="#" id="opt-in-link" class="underline text-blue-600">here</a>!</strong>';
+  if (consent === "declined" && optInP) {
+    optInP.innerHTML =
+      'Want to help make this website better? <a href="#" id="opt-in-link" class="underline text-blue-600">Opt back in here</a>!';
     const link = document.getElementById("opt-in-link");
 
     link.addEventListener("click", function (e) {
@@ -21,10 +21,9 @@ function offerOptIn () {
       // remove the “declined” flag
       localStorage.removeItem("cookieConsent");
       // hide this message
-      optSpan.textContent = "";
+      optInP.textContent = "";
       // show the banner again
       banner.style.display = "flex";
     });
   }
-  // if consent is “accepted” or not set, leave the span empty
 }

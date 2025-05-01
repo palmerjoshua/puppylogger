@@ -39,13 +39,11 @@ async function logActivity(activity) {
   
 
   await db.activities.add({
-    type:                activity,
+    type: activity,
     createddate,
-    starttimeDisplay:    display,
-    starttimeSortable:   sortable,
-    endtimeDisplay:      null,
-    endtimeSortable:     null,
-    notes:               null
+    starttimeSortable: sortable,
+    endtimeSortable: null,
+    notes: null
   });
 
   await renderLogs();
@@ -224,9 +222,15 @@ async function renderLogs() {
         const leftDiv = document.createElement("div");
         leftDiv.className = "flex flex-col";
 
-        const timeDisplay = item.endtimeDisplay
-          ? `${item.starttimeDisplay} - ${item.endtimeDisplay}`
-          : item.starttimeDisplay;
+
+        const startDisplay = convertTo12hFormat(item.starttimeSortable);
+        const endDisplay   = item.endtimeSortable
+                              ? convertTo12hFormat(item.endtimeSortable)
+                              : null;
+        
+        const timeDisplay = endDisplay
+          ? `${startDisplay} - ${endDisplay}`
+          : startDisplay;
 
         let noteSpan = "";
         if (item.notes) {
@@ -334,6 +338,30 @@ function openModal()         { document.getElementById("modal").classList.replac
 function closeModal()        { document.getElementById("modal").classList.replace("flex","hidden"); }
 function scrollToTop()       { window.scrollTo({ top: 0, behavior: "smooth" }); }
 function scrollToBottom()    { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }
+function openExportConfirm() {
+  document.getElementById('exportConfirmModal')
+          .classList.replace('hidden','flex');
+}
+function closeExportConfirm() {
+  document.getElementById('exportConfirmModal')
+          .classList.replace('flex','hidden');
+}
+
+document.getElementById('export-first-yes')
+  .addEventListener('click', () => {
+    closeExportConfirm();
+    // show your CSV modal:
+    document.getElementById('csv-modal')
+            .classList.replace('hidden','flex');
+});
+
+document.getElementById('export-first-no')
+  .addEventListener('click', () => {
+    closeExportConfirm();
+    // now show the normal "Are you sure?" clear modal:
+    openClearConfirm();
+});
+
 
 // --- DATE PICKER ---
 function openDatePicker() {
@@ -396,5 +424,119 @@ function formatDate(isoDate) {
   return `${months[month-1]} ${day}, ${year}`;
 }
 
-// --- INITIALIZE ---
-renderLogs();
+const importBtn    = document.getElementById('importExportBtn');
+const modal        = document.getElementById('csv-modal');
+const exportBtn    = document.getElementById('csv-export-btn');
+const importInput  = document.getElementById('csv-import-input');
+const closeBtn     = document.getElementById('csv-modal-close');
+
+// open/close modal
+importBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+closeBtn .addEventListener('click', () => modal.classList.add('hidden'));
+
+// EXPORT
+exportBtn.addEventListener('click', async () => {
+  try {
+    // fetch all records
+    const allLogs = await db.activities
+    .orderBy('[createddate+starttimeSortable]')
+    .reverse()
+    .toArray();
+    // build CSV
+    const header = ['id','type','createddate','starttime','endtime','notes'];
+    const rows = allLogs.map(log => {
+      // escape quotes in text fields
+      const esc = str => `"${(str||'').replace(/"/g,'""')}"`;
+      return [
+        log.id,
+        esc(log.type),
+        log.createddate,
+        log.starttimeSortable,
+        log.endtimeSortable||'',
+        esc(log.notes)
+      ].join(',');
+    });
+    const csv = [header.join(','), ...rows].join('\r\n');
+    // trigger download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `puppy-logs-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Export failed: ' + err);
+  }
+});
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      // double quote inside quoted field -> literal quote
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+
+    } else if (char === ',' && !inQuotes) {
+      // end of field
+      result.push(current);
+      current = "";
+
+    } else {
+      current += char;
+    }
+  }
+
+  // last field
+  result.push(current);
+  return result;
+}
+
+importInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const text  = await file.text();
+    const lines = text.split(/\r\n|\n/).filter(l => l);
+    const [header, ...dataRows] = lines;
+    const cols = parseCSVLine(header)
+      .map(h => h.replace(/^"|"$/g, '')   // remove outer quotes
+      .replace(/""/g, '"'));             // un-escape any doubled quotes
+    const idx   = name => cols.indexOf(name);
+
+    const records = dataRows.map(line => {
+      const cells = parseCSVLine(line);
+      return {
+        id:            Number(cells[idx('id')] || Date.now()),
+        type:          cells[idx('type')]             .replace(/^"|"$/g,'').replace(/""/g,'"'),
+        createddate:   cells[idx('createddate')]      || '',
+        starttimeSortable: cells[idx('starttime')]    || '',
+        endtimeSortable:   cells[idx('endtime')]      || undefined,
+        notes:         (cells[idx('notes')]            || '')
+                          .replace(/^"|"$/g,'')
+                          .replace(/""/g,'"')         || undefined
+      };
+    });
+
+    await db.activities.bulkPut(records);
+
+    renderLogs();
+    alert('Import successful!');
+  } catch (err) {
+    alert('Import failed: ' + err);
+  } finally {
+    e.target.value = '';
+    modal.classList.add('hidden');
+  }
+});
