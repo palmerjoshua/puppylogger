@@ -22,7 +22,11 @@
     ></script>
     {% include "commonScripts.njk" %}
     <script src="/js/index.js" defer>
-      renderLogs();
+    </script>
+    <script>
+      window.addEventListener("load", function () {
+        renderLogs();
+      });
     </script>
   </body>
 </html>
