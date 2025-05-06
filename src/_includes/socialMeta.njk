@@ -1,0 +1,12 @@
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{{ title | escape }}" />
+<meta property="og:description" content="{{ description | trim }}" />
+<meta property="og:url" content="{{ page.url }}" />
+<meta property="og:image" content="{{ imageUrl or 'https://puppylogger.com/img/puppyLoggerLogo.png' | trim }}" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ title | escape }}" />
+<meta name="twitter:description" content="{{ description | trim }}" />
+<meta name="twitter:image" content="{{ imageUrl or 'https://puppylogger.com/img/puppyLoggerLogo.png' | trim }}" />
