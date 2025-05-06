@@ -1,0 +1,60 @@
+<style>
+  .editing {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .editing input,
+  .editing select,
+  .editing textarea {
+    background-color: #fff;
+  }
+
+  .modal {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .truncate-note {
+    max-width: 100%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @keyframes fadeSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-open {
+    animation: fadeSlideDown 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .disclaimer {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  @media (min-width: 48rem) {
+    .js-hamburger {
+      display: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,231 @@
+---
+title: Puppy Logger
+layout: appBase.njk
+description: "Puppy Logger: Track your puppy's daily activities with the tap of a button."
+---
+
+<main class="flex-grow w-full max-w-md space-y-6">
+  <section aria-labelledby="activity-controls">
+    <h2 id="activity-controls" class="sr-only">Log Activities</h2>
+    <form
+      id="activity-form"
+      role="group"
+      aria-label="Log puppy activities"
+      class="grid grid-cols-2 gap-4 mb-6"
+    >
+      <button
+        type="button"
+        onclick="logActivity('🍴 Feed')"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        data-ga-event="log_feed"
+      >
+        🍴 Feed
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('🛏 Sleep')"
+        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+        data-ga-event="log_sleep"
+      >
+        🛏 Sleep
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('⚽ Play')"
+        class="bg-teal-700 hover:bg-teal-800 text-white font-bold py-2 px-4 rounded"
+        data-ga-event="log_play"
+      >
+        ⚽ Play
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('🎓 Train')"
+        class="bg-orange-700 hover:bg-orange-800 text-white font-bold py-2 px-4 rounded"
+        data-ga-event="log_train"
+      >
+        🎓 Train
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('🚶 Walk')"
+        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        data-ga-event="log_walk"
+      >
+        🚶 Walk
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('💧 Pee')"
+        class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded"
+        data-ga-event="log_pee"
+      >
+        💧 Pee
+      </button>
+      <button
+        type="button"
+        onclick="logActivity('💩 Poop')"
+        class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded col-span-2"
+        data-ga-event="log_poop"
+      >
+        💩 Poop
+      </button>
+    </form>
+  </section>
+
+  <section
+    aria-label="jump-controls"
+    class="jump-controls flex justify-between mb-4"
+  >
+    <form id="top-jump-form" role="group" aria-label="Jump to region">
+      <button
+        type="button"
+        onclick="scrollToBottom()"
+        class="px-3 py-1 rounded border"
+        data-ga-event="top_jump_bottom"
+      >
+        Jump to bottom
+      </button>
+      <button
+        type="button"
+        onclick="openDatePicker()"
+        class="px-3 py-1 rounded border"
+        data-ga-event="top_pick_date_open"
+      >
+        Jump to date
+      </button>
+      <input
+        type="date"
+        id="datePicker"
+        class="hidden ml-2 border rounded px-2 py-1"
+        data-ga-event="top_pick_date_select"
+      />
+    </form>
+  </section>
+
+  <!-- Welcome message (show when list is empty) -->
+  <section
+    id="welcome-message"
+    role="region"
+    aria-label="Welcome message"
+    class="max-w-md mx-auto bg-white p-6 rounded-lg shadow mb-6"
+  >
+    <h2 class="text-xl font-bold mb-2">
+      Welcome to Puppy Activity Logger!
+    </h2>
+    <p class="mb-4">
+      Puppy Activity Logger is a lightweight, mobile-friendly web app that
+      helps you keep track of your puppy’s daily routine—no sign-up or
+      server needed, and all data stays private on your device.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-1">How it works</h3>
+    <ol class="list-decimal list-inside mb-4 text-gray-700 space-y-1">
+      <li>
+        <strong>Log an event:</strong> Tap one of the activity buttons above
+        (Feed, Sleep, Play, Pee, Poop). Each tap instantly records the
+        current time.
+      </li>
+      <li>
+        <strong>View your timeline:</strong> Entries appear below, grouped
+        by date and sorted newest-first.
+      </li>
+      <li>
+        <strong>Edit anytime:</strong> Tap the ✏️ icon next to any entry to
+        change its start time or activity, add a note or end time, or delete
+        it.
+      </li>
+    </ol>
+
+    <h3 class="text-lg font-semibold mb-1">Getting started</h3>
+    <ul class="list-disc list-inside mb-4 text-gray-700 space-y-1">
+      <li>Tap <strong>🍴 Feed</strong> when mealtime arrives.</li>
+      <li>Tap <strong>🛏 Sleep</strong> as your pup drifts off.</li>
+      <li>
+        Use <strong>⚽ Play</strong>, <strong>🚶 Walk</strong>,
+        <strong>🎓 Train</strong>, <strong>💧 Pee</strong>, and
+        <strong>💩 Poop</strong> for quick logging throughout the day.
+      </li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-1">Core features</h3>
+    <ul class="list-disc list-inside mb-4 text-gray-700 space-y-1">
+      <li>
+        <strong>Instant logging:</strong> One-tap entries with no delays.
+      </li>
+      <li>
+        <strong>Local privacy:</strong> Everything saved in your browser’s
+        local storage—no data ever leaves your device.
+      </li>
+      <li>
+        <strong>Full editing:</strong> Adjust times, add notes or an end
+        time, and delete entries on the fly.
+      </li>
+      <li>
+        <strong>Daily organization:</strong> Automatically groups logs by
+        date for easy review.
+      </li>
+      <li>
+        <strong>Responsive design:</strong> Optimized for phones and
+        tablets, so you can log on the go.
+      </li>
+    </ul>
+
+    <p class="text-gray-600">
+      Ready to start? Tap a button above to record your puppy’s first
+      activity!
+    </p>
+
+    <p class="disclaimer">
+      By using this site, you agree to the
+      <a href="/privacy/" class="text-blue-700 underline">Privacy Policy</a
+      >.
+    </p>
+  </section>
+
+  <section aria-labelledby="log-list">
+    <h2 id="log-list" class="sr-only">Activity Logs</h2>
+    <ul id="logList" class="list-none p-0 space-y-6 w-full max-w-md"></ul>
+  </section>
+
+  <!-- Import / Export CSV -->
+  <button
+    id="importExportBtn"
+    type="button"
+    class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded mt-4"
+  >
+    Import / Export CSV
+  </button>
+
+  <button
+    type="button"
+    onclick="openExportConfirm()"
+    class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-2 rounded"
+    data-ga-event="clear_entries_open"
+  >
+    Clear All Entries
+  </button>
+
+  <section
+    aria-label="bottom-jump-controls"
+    class="jump-controls flex justify-between mt-4"
+  >
+    <form id="bottom-jump-form">
+      <button
+        type="button"
+        onclick="scrollToTop()"
+        class="px-3 py-1 rounded border"
+        data-ga-event="bottom_jump_top"
+      >
+        Jump to top
+      </button>
+      <button
+        type="button"
+        onclick="openDatePicker()"
+        class="px-3 py-1 rounded border"
+        data-ga-event="bottom_pick_date_open"
+      >
+        Jump to date
+      </button>
+    </form>
+  </section>
+</main>

@@ -2,14 +2,19 @@
   "name": "puppylogger",
   "version": "1.0.0",
   "description": "A simple, mobile-friendly web app to track your new puppy's activities — naps, feedings, playtime, pee, and poop — with one-tap logging.",
-  "main": "index.js",
+  "engines": {
+    "node": "22.15.0"
+  },
   "scripts": {
-    "clean": "npx rimraf dist",
-    "build:css": "npx @tailwindcss/cli -i src/styles.css -o dist/styles.css --minify",
-    "copy:static": "npx cpx \"src/**/*.{html,js,txt,xml}\" dist && npx cpx src/CNAME dist/",
-    "minify:html": "npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true --input-dir dist --output-dir dist --file-ext html",
-    "minify:js": "npx terser dist/index.js -c -m -o dist/index.js",
-    "build": "npm run clean && npm run build:css && npm run copy:static && npm run minify:html && npm run minify:js"
+    "css": "postcss src/styles/main.css -o dist/assets/main.css --env production",
+    "css:watch": "postcss src/styles/main.css -o dist/assets/main.css --watch",
+    "js:minify": "node scripts/minify-js.js",
+    "11ty": "eleventy",
+    "11ty:watch": "eleventy --serve",
+    "dev": "concurrently \"npm:css:watch\" \"npm:11ty:watch\"",
+    "build": "npm run css && npm run 11ty && npm run js:minify",
+    "preview": "serve dist -l 8080",
+    "debug": "cross-env DEBUG=Eleventy* npx @11ty/eleventy"
   },
   "repository": {
     "type": "git",
@@ -25,10 +30,21 @@
   "homepage": "https://github.com/palmerjoshua/puppylogger.com#readme",
   "devDependencies": {
     "cpx": "^1.2.1",
-    "html-minifier-terser": "^7.2.0",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^4.1.4",
-    "terser": "^5.39.0"
+    "terser": "^5.39.0",
+    "@11ty/eleventy": "^3.0.0",
+    "@tailwindcss/postcss": "^4.1.5",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.25.1",
+    "html-minifier-terser": "^7.2.0",
+    "luxon": "^3.6.1",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "prettier": "^3.5.3",
+    "serve": "^14.2.4",
+    "tailwindcss": "^4.1.5"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.4"
