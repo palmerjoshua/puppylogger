@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "commonMeta.njk" %}
+    <meta
+      name="description"
+      content="{{ description | escape }}"
+    />
+    <title>{{ title or 'Puppy Logger' }}</title>
+    {% include "commonLinks.njk" %}
+    {% include "staticInlineStyle.njk" %}
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    {% include "header.njk" %}
+    {{ content | safe }}
+    {% include "footer.njk" %}
+    {% include "commonScripts.njk" %}
+    <script>
+      const consent = localStorage.getItem("cookieConsent");
+      if (consent === "accepted") {
+        document.addEventListener("click", function (event) {
+          const target = event.target.closest("[data-ga-event]");
+          if (target) {
+            const action = target.getAttribute("data-ga-event");
+            gtag("event", "control_use", {
+              event_category: "interaction",
+              event_label: action,
+              value: 1,
+            });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

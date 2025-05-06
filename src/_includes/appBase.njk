@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "commonMeta.njk" %}
+    <meta
+      name="description"
+      content="{{ description | escape }}"
+    />
+    <title>{{ title or 'Puppy Logger' }}</title>
+    {% include "commonLinks.njk" %}
+    {% include "appInlineStyle.njk" %}
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    {% include "cookieBanner.njk" %}
+    {% include "header.njk" %}
+    {{ content | safe }}
+    {% include "footer.njk" %}
+    {% include "appModals.njk" %}
+    <script
+      src="https://unpkg.com/dexie@latest/dist/dexie.min.js"
+      defer
+    ></script>
+    {% include "commonScripts.njk" %}
+    <script src="/js/index.js" defer>
+      renderLogs();
+    </script>
+  </body>
+</html>
